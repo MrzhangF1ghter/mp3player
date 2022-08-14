@@ -67,12 +67,12 @@ typedef struct
  */
 typedef struct
 {
-    uint8_t id[4];      /* Ö¡ID,ÎªXing/Info */
-    uint8_t version[2]; /* °æ±¾ºÅ */
-    uint8_t delay[2];   /* ÑÓ³Ù */
-    uint8_t quality[2]; /* ÒôÆµÖÊÁ¿,0~100,Ô½´óÖÊÁ¿Ô½ºÃ */
-    uint8_t fsize[4];   /* ÎÄ¼ş×Ü´óĞ¡ */
-    uint8_t frames[4];  /* ÎÄ¼ş×ÜÖ¡Êı  */
+    uint8_t id[4];      /* å¸§IDï¼Œä¸ºXing/Info */
+    uint8_t version[2]; /* ç‰ˆæœ¬å· */
+    uint8_t delay[2];   /* å»¶è¿Ÿ */
+    uint8_t quality[2]; /* éŸ³é¢‘è´¨é‡ï¼Œ0~100ï¼Œè¶Šå¤§è´¨é‡è¶Šå¥½ */
+    uint8_t fsize[4];   /* æ–‡ä»¶æ€»å¤§å° */
+    uint8_t frames[4];  /* æ–‡ä»¶æ€»å¸§æ•° */
 } MP3_FrameVBRI_t;
 
 /**

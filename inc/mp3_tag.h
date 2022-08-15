@@ -67,12 +67,12 @@ typedef struct
  */
 typedef struct
 {
-    uint8_t id[4];      /* 帧ID，为Xing/Info */
-    uint8_t version[2]; /* 版本号 */
-    uint8_t delay[2];   /* 延迟 */
-    uint8_t quality[2]; /* 音频质量，0~100，越大质量越好 */
-    uint8_t fsize[4];   /* 文件总大小 */
-    uint8_t frames[4];  /* 文件总帧数 */
+    uint8_t id[4];      /* frame id:Xing/Info */
+    uint8_t version[2]; /* VBRI Version */
+    uint8_t delay[2];   /* delay */
+    uint8_t quality[2]; /* audio quality，0~100 */
+    uint8_t fsize[4];   /* file size */
+    uint8_t frames[4];  /* total frame */
 } MP3_FrameVBRI_t;
 
 /**

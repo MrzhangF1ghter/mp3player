@@ -3,6 +3,7 @@
  *
  * Date           Author       Notes
  * 2021-06-02     MrzhangF1ghter    first implementation
+ * 2022-10-27     MrzhangF1ghter    fix warning
  */
 
 #include "mp3_player.h"

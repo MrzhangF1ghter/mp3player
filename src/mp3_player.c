@@ -3,6 +3,7 @@
  *
  * Date           Author       Notes
  * 2021-06-02     MrzhangF1ghter    first implementation
+ * 2022-10-27     MrzhangF1ghter    fix warning
  */
 
 #include "mp3_player.h"
@@ -239,7 +240,7 @@ uint32_t mp3_get_cur_seconds(void)
 
     if (player.fp == RT_NULL)
     {
-        return -1;
+        return 0;
     }
     fptr = ftell(player.fp);
     if (fptr > player.mp3_info.data_start)
@@ -457,13 +458,9 @@ static void mp3_player_entry(void *parameter)
     rt_int32_t size;
     int event;
 
-    uint32_t count = 0;
-
     /* decoder relate */
     int i = 0;
     int err;
-
-    uint32_t cur_ms = 0;
 
     player.in_buffer = rt_malloc(MP3_INPUT_BUFFER_SIZE);
     if (player.in_buffer == RT_NULL)
@@ -715,4 +712,5 @@ static char *MP3Decode_ERR_CODE_get(int err_code)
     case ERR_UNKNOWN:
         return "ERR_UNKNOWN";
     }
+	return "ERR_UNKNOWN";
 }

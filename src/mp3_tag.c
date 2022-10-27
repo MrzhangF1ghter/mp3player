@@ -3,11 +3,13 @@
  *
  * Date           Author       Notes
  * 2021-06-02     MrzhangF1ghter    first implementation
+ * 2022-10-27     MrzhangF1ghter    fix warning
  */
 
 #include "mp3_tag.h"
 #include <rtthread.h>
 #include <string.h>
+#include <stdio.h>
 
 #define LOG_TAG "mp3 tag"
 #define LOG_LVL DBG_INFO
@@ -174,7 +176,7 @@ char *genre_type[] = {
  */
 char *mp3_get_genre_string_by_id(uint16_t genre_id)
 {
-    if (genre_id < 0 || genre_id > 147)
+    if (genre_id > 147)
         return RT_NULL;
     return genre_type[genre_id];
 }
@@ -210,6 +212,7 @@ rt_err_t mp3_info_print(mp3_info_t mp3_info)
     rt_kprintf("Bitrate:%d kbit/s\r\n", mp3_info.bitrate / 1000);
     rt_kprintf("Frequency:%d Hz\r\n", mp3_info.samplerate);
     rt_kprintf("--------------------------------\r\n");
+	return RT_EOK;
 }
 
 /**
@@ -221,8 +224,8 @@ rt_err_t mp3_info_print(mp3_info_t mp3_info)
 static rt_err_t mp3_id3v1_tag_decode(FILE *fp, uint8_t *buf, mp3_basic_info_t *basic_info)
 {
     ID3V1_Tag_t *tag;
-    fpos_t file_pos = 0;
-    int read_size;
+    long int file_pos;
+    //int read_size;
     rt_err_t ret;
 
     if (fp == RT_NULL || buf == RT_NULL)
@@ -244,13 +247,13 @@ static rt_err_t mp3_id3v1_tag_decode(FILE *fp, uint8_t *buf, mp3_basic_info_t *b
     if (strncmp("TAG", (char *)tag->id, 3) == 0)
     {
         /* is id3v1 tag,copy to user */
-        if (tag->title)
+        if (strlen((const char*)tag->title))
             memcpy(basic_info->title, tag->title, 30);
-        if (tag->artist)
+        if (strlen((const char*)tag->artist))
             memcpy(basic_info->artist, tag->artist, 30);
-        if (tag->year)
+        if (strlen((const char*)tag->year))
             memcpy(basic_info->year, tag->year, 4);
-        if (tag->comment)
+        if (strlen((const char*)tag->comment))
             memcpy(basic_info->comment, tag->comment, 30);
         basic_info->genre = tag->genre;
         ret = RT_EOK;
@@ -274,9 +277,8 @@ __exit:
  * @return the error code,0 on success
  * @verbatim  Taken from http://www.mikrocontroller.net/topic/252319
  */
-static uint8_t mp3_read_id3v2_text(FILE *fp, uint32_t data_len, char *buff, uint32_t buff_size)
+static uint8_t mp3_read_id3v2_text(FILE *fp, uint32_t data_len, uint8_t *buff, uint32_t buff_size)
 {
-    uint32_t read_size = 0;
     uint8_t byEncoding = 0;
     if (fread(&byEncoding, 1, 1, fp) == 1)
     {
@@ -344,9 +346,8 @@ static uint32_t mp3_id3v2_tag_decode(FILE *fp, mp3_basic_info_t *mp3_info)
 
     uint32_t ret = 0;
 
-    uint32_t read_size;
     uint32_t tag_size = 0;
-    fpos_t file_pos = 0;
+    long int file_pos = 0;
 
     uint32_t offset = 0;
     uint8_t exhd[4];
@@ -393,7 +394,7 @@ static uint32_t mp3_id3v2_tag_decode(FILE *fp, mp3_basic_info_t *mp3_info)
                     ret = 0;
                     goto __exit;
                 }
-                if (frame_head.id[0] == 0 || (strncmp(frame_head.id, "3DI", 3) == 0))
+                if (frame_head.id[0] == 0 || (strncmp((const char*)frame_head.id, "3DI", 3) == 0))
                 {
                     break;
                 }
@@ -413,7 +414,7 @@ static uint32_t mp3_id3v2_tag_decode(FILE *fp, mp3_basic_info_t *mp3_info)
                     }
                 }
 
-                if (strcmp(frame_head.id, "TPE1") == 0)
+                if (strcmp((const char*)frame_head.id, "TPE1") == 0)
                 {
                     /* artist */
                     if (mp3_read_id3v2_text(fp, frame_size, mp3_info->artist, 30) != 0)
@@ -422,10 +423,10 @@ static uint32_t mp3_id3v2_tag_decode(FILE *fp, mp3_basic_info_t *mp3_info)
                     }
                     frame_to_read--;
                 }
-                else if (strcmp(frame_head.id, "TIT2") == 0)
+                else if (strcmp((const char*)frame_head.id, "TIT2") == 0)
                 {
                     /* title */
-                    if (mp3_read_id3v2_text(fp, frame_size, mp3_info->title, 30) != 0)
+                    if (mp3_read_id3v2_text(fp, frame_size,mp3_info->title, 30) != 0)
                     {
                         break;
                     }
@@ -463,9 +464,9 @@ rt_err_t mp3_get_info(struct mp3_player *player)
     uint32_t p;
     short samples_per_frame;
     uint32_t total_frame;
-    ID3V1_Tag_t ID3V1_Tag = {0};
+
     uint32_t read_size = 0;
-    fpos_t file_pos = 0;
+    long int file_pos = 0;
 
     if (player->fp == NULL)
     {
@@ -557,9 +558,9 @@ rt_err_t mp3_get_info(struct mp3_player *player)
         LOG_E("can not find sync frame");
         ret = RT_ERROR;
     }
-__exit:
-
-    if (player->fp)
-        fsetpos(player->fp, &file_pos); /* resume file positon */
+	
+//__exit:
+//    if (player->fp)
+//        fsetpos(player->fp, &file_pos); /* resume file positon */
     return ret;
 }
